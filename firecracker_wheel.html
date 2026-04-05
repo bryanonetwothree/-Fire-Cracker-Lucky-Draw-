@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>燒炮仗 Lucky Draw 🧨</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Bebas+Neue&display=swap');
+
+  :root {
+    --red: #C0180E;
+    --deep-red: #7A0A05;
+    --gold: #F5C842;
+    --bright-gold: #FFE066;
+    --bg: #1A0300;
+    --paper: #2B0A04;
+    --text: #FFE8D0;
+    --smoke: rgba(255,220,150,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(192,24,14,0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(192,24,14,0.12) 0%, transparent 50%),
+      repeating-linear-gradient(45deg, transparent, transparent 30px, var(--smoke) 30px, var(--smoke) 31px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .firecrackers {
+    font-size: 2.8rem;
+    display: block;
+    animation: sway 3s ease-in-out infinite;
+    letter-spacing: 4px;
+  }
+
+  @keyframes sway {
+    0%,100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 9vw, 3.2rem);
+    color: var(--gold);
+    letter-spacing: 3px;
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(245,200,66,0.5), 2px 2px 0 var(--deep-red);
+    margin: 6px 0 4px;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: rgba(255,232,208,0.6);
+    letter-spacing: 1px;
+  }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.4;
+  }
+  .divider span { color: var(--gold); font-size: 1rem; }
+
+  /* ── Screens ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Setup Screen ── */
+  .setup-label {
+    font-size: 0.8rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .names-area {
+    background: var(--paper);
+    border: 1px solid rgba(245,200,66,0.3);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .name-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(245,200,66,0.25);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus { border-color: var(--gold); }
+  input[type="text"]::placeholder { color: rgba(255,232,208,0.3); }
+
+  .btn-icon {
+    background: rgba(192,24,14,0.3);
+    border: 1px solid rgba(192,24,14,0.5);
+    border-radius: 8px;
+    color: var(--gold);
+    font-size: 1.1rem;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .btn-icon:hover { background: rgba(192,24,14,0.6); transform: scale(1.05); }
+
+  .names-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 36px;
+  }
+
+  .name-tag {
+    background: linear-gradient(135deg, var(--deep-red), var(--red));
+    border: 1px solid rgba(245,200,66,0.4);
+    border-radius: 20px;
+    padding: 4px 12px 4px 10px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.7); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .name-tag-del {
+    background: none;
+    border: none;
+    color: rgba(255,232,208,0.5);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .name-tag-del:hover { color: var(--bright-gold); }
+
+  .count-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: rgba(255,232,208,0.4);
+    margin-top: 8px;
+  }
+
+  /* ── Big Button ── */
+  .btn-main {
+    width: 100%;
+    background: linear-gradient(135deg, var(--red) 0%, #E8290E 50%, var(--red) 100%);
+    border: 2px solid var(--gold);
+    border-radius: 14px;
+    color: var(--bright-gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 1px 1px 0 var(--deep-red);
+    box-shadow: 0 4px 20px rgba(192,24,14,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    margin-top: 6px;
+  }
+  .btn-main:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(192,24,14,0.6); }
+  .btn-main:active { transform: translateY(0); }
+  .btn-main:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(245,200,66,0.4);
+    border-radius: 10px;
+    color: rgba(255,232,208,0.7);
+    font-family: 'Noto Serif TC', serif;
+    font-size: 0.9rem;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--text); }
+
+  /* ── Wheel Screen ── */
+  #wheel-screen { text-align: center; }
+
+  .wheel-wrap {
+    position: relative;
+    width: min(320px, 86vw);
+    height: min(320px, 86vw);
+    margin: 10px auto 18px;
+  }
+
+  #wheel-canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(192,24,14,0.5), 0 0 80px rgba(192,24,14,0.2);
+  }
+
+  .wheel-pointer {
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+    z-index: 10;
+    animation: pointerPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pointerPulse {
+    0%,100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.15); }
+  }
+
+  .wheel-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px;
+    background: radial-gradient(circle, var(--bright-gold), var(--gold));
+    border-radius: 50%;
+    border: 3px solid var(--deep-red);
+    box-shadow: 0 0 12px rgba(245,200,66,0.6);
+    z-index: 5;
+  }
+
+  /* ── Result Screen ── */
+  #result-screen { text-align: center; }
+
+  .result-boom {
+    font-size: 3.5rem;
+    animation: boom 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    display: block;
+    margin-bottom: 8px;
+  }
+  @keyframes boom {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    60% { transform: scale(1.3) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); opacity: 1; }
+  }
+
+  .result-label {
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: rgba(255,232,208,0.6);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .result-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 16vw, 5rem);
+    color: var(--bright-gold);
+    text-shadow: 0 0 30px rgba(255,224,102,0.7), 3px 3px 0 var(--deep-red);
+    line-height: 1;
+    margin-bottom: 6px;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%,100% { text-shadow: 0 0 30px rgba(255,224,102,0.7), 3px 3px 0 var(--deep-red); }
+    50% { text-shadow: 0 0 50px rgba(255,224,102,1), 3px 3px 0 var(--deep-red); }
+  }
+
+  .result-desc {
+    color: rgba(255,232,208,0.7);
+    font-size: 0.95rem;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .result-card {
+    background: linear-gradient(135deg, var(--paper), rgba(122,10,5,0.3));
+    border: 1px solid rgba(245,200,66,0.35);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .result-card-title {
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ── Chicken Out Screen ── */
+  #chicken-screen { text-align: center; }
+
+  .chicken-emoji { font-size: 3rem; display: block; margin-bottom: 8px;
+    animation: shake 0.5s ease infinite alternate; }
+  @keyframes shake {
+    from { transform: rotate(-5deg); }
+    to { transform: rotate(5deg); }
+  }
+
+  .chicken-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+
+  .chicken-desc {
+    font-size: 0.9rem;
+    color: rgba(255,232,208,0.65);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .select-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--paper);
+    border: 1px solid rgba(245,200,66,0.35);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1rem;
+    padding: 12px 36px 12px 14px;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+  }
+  .select-arrow {
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    pointer-events: none;
+    font-size: 0.8rem;
+  }
+
+  /* ── Forfeit Screen ── */
+  #forfeit-screen { text-align: center; }
+
+  .forfeit-reveal {
+    background: linear-gradient(135deg, rgba(122,10,5,0.5), rgba(192,24,14,0.2));
+    border: 2px solid var(--gold);
+    border-radius: 16px;
+    padding: 24px 20px;
+    margin: 16px 0 20px;
+    animation: revealIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes revealIn {
+    from { transform: scale(0.8) rotateX(20deg); opacity: 0; }
+    to { transform: scale(1) rotateX(0); opacity: 1; }
+  }
+
+  .forfeit-emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+  .forfeit-text {
+    font-size: 1.15rem;
+    color: var(--bright-gold);
+    font-weight: 700;
+    line-height: 1.5;
+  }
+
+  /* ── Sparks animation ── */
+  .sparks-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    display: none;
+  }
+  .sparks-container.active { display: block; }
+
+  .spark {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    animation: sparkFly var(--dur, 1s) ease-out forwards;
+  }
+  @keyframes sparkFly {
+    0% { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+  }
+
+  /* Confetti burst */
+  .confetti-piece {
+    position: absolute;
+    width: 8px; height: 8px;
+    animation: confettiFall var(--dur,1.5s) ease-out forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translate(0,0) rotate(0deg) scale(1); opacity:1; }
+    100% { transform: translate(var(--dx),var(--dy)) rotate(var(--rot,360deg)) scale(0.3); opacity:0; }
+  }
+
+  /* ── Misc ── */
+  .nominee-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--deep-red), var(--red));
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    margin: 4px;
+  }
+
+  .spinning #wheel-canvas {
+    animation: spinGlow 0.1s linear infinite;
+  }
+  @keyframes spinGlow {
+    0% { box-shadow: 0 0 40px rgba(192,24,14,0.5), 0 0 80px rgba(192,24,14,0.2); }
+    50% { box-shadow: 0 0 60px rgba(245,200,66,0.6), 0 0 120px rgba(192,24,14,0.3); }
+    100% { box-shadow: 0 0 40px rgba(192,24,14,0.5), 0 0 80px rgba(192,24,14,0.2); }
+  }
+
+  .history-line {
+    font-size: 0.8rem;
+    color: rgba(255,232,208,0.45);
+    margin-bottom: 4px;
+  }
+
+  hr.gold { border: none; border-top: 1px solid rgba(245,200,66,0.2); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<!-- Sparks overlay -->
+<div class="sparks-container" id="sparks"></div>
+
+<div class="container">
+
+  <!-- HEADER (always visible) -->
+  <div class="header">
+    <span class="firecrackers">🧨🧨🧨</span>
+    <h1>燒炮仗<br>Lucky Draw</h1>
+    <p class="subtitle">清明節特備節目 · 今次要邊個燒炮仗？</p>
+  </div>
+
+  <!-- ══ SCREEN 1: SETUP ══ -->
+  <div class="screen active" id="setup-screen">
+    <span class="setup-label">👨‍👩‍👧‍👦 輸入參加者名字</span>
+
+    <div class="names-area">
+      <div class="name-input-row">
+        <input type="text" id="name-input" placeholder="輸入名字 (e.g. 卓謙,衍泓 …)" maxlength="12"
+          onkeydown="if(event.key==='Enter')addName()">
+        <button class="btn-icon" onclick="addName()">＋</button>
+      </div>
+      <div class="names-list" id="names-list">
+        <!-- tags rendered here -->
+      </div>
+      <p class="count-hint" id="count-hint">尚未加入任何人</p>
+    </div>
+
+    <button class="btn-main" id="spin-btn" onclick="goToWheel()" disabled>
+      🎰 開始抽籤！
+    </button>
+
+    <button class="btn-secondary" onclick="addDefaults()">
+      快速加入示範名字
+    </button>
+  </div>
+
+  <!-- ══ SCREEN 2: WHEEL ══ -->
+  <div class="screen" id="wheel-screen">
+    <p style="font-size:0.8rem;color:rgba(255,232,208,0.5);letter-spacing:2px;margin-bottom:10px;">
+      ▼ 命中注定 ▼
+    </p>
+    <div class="wheel-wrap" id="wheel-wrap">
+      <div class="wheel-pointer">🔺</div>
+      <canvas id="wheel-canvas" width="600" height="600"></canvas>
+      <div class="wheel-center"></div>
+    </div>
+    <button class="btn-main" id="spin-go-btn" onclick="spinWheel()">
+      🔥 轉動命運！
+    </button>
+    <button class="btn-secondary" onclick="showScreen('setup-screen')">← 返回修改名單</button>
+  </div>
+
+  <!-- ══ SCREEN 3: RESULT ══ -->
+  <div class="screen" id="result-screen">
+    <span class="result-boom" id="result-boom">🧨</span>
+    <p class="result-label">今日英雄</p>
+    <div class="result-name" id="result-name">阿明</div>
+    <p class="result-desc" id="result-desc">恭喜你！你被選中點燃炮仗！<br>勇敢面對，祈求好運！🙏</p>
+
+    <div class="result-card" id="history-card" style="display:none;">
+      <div class="result-card-title">📜 本輪歷史</div>
+      <div id="history-list"></div>
+    </div>
+
+    <button class="btn-main" onclick="showScreen('wheel-screen');drawWheel()">
+      🔄 再轉一次！
+    </button>
+    <button class="btn-secondary" id="chicken-btn" onclick="goChicken()">
+      🐔 我唔敢！我要提名人！
+    </button>
+    <button class="btn-secondary" onclick="resetAll()" style="margin-top:6px;">重新開始</button>
+  </div>
+
+  <!-- ══ SCREEN 4: CHICKEN OUT ══ -->
+  <div class="screen" id="chicken-screen">
+    <span class="chicken-emoji">🐔</span>
+    <div class="chicken-title">膽小鬼！</div>
+    <p class="chicken-desc">
+      OK OK… 你可以提名其他人代替你，<br>
+      但你<strong style="color:var(--gold)">必須接受一個懲罰</strong>！<br>
+      <span style="font-size:0.82rem;opacity:0.7;">家庭場合，請量力而為 😄</span>
+    </p>
+
+    <span class="setup-label">👉 提名誰來代替？</span>
+    <div class="select-wrap">
+      <select id="nominee-select"></select>
+      <span class="select-arrow">▼</span>
+    </div>
+
+    <button class="btn-main" onclick="confirmChicken()">
+      ✅ 確認提名 + 抽懲罰！
+    </button>
+    <button class="btn-secondary" onclick="showScreen('result-screen')">
+      😤 算了我去燒！
+    </button>
+  </div>
+
+  <!-- ══ SCREEN 5: FORFEIT ══ -->
+  <div class="screen" id="forfeit-screen">
+    <span style="font-size:1.8rem;display:block;margin-bottom:4px;">⚖️</span>
+    <div class="chicken-title" style="margin-bottom:4px;">懲罰宣判！</div>
+    <p class="result-label" style="margin-bottom:0;">提名者</p>
+    <div class="result-name" style="font-size:2.5rem;margin-bottom:4px;" id="nominee-name">阿明</div>
+    <p style="font-size:0.85rem;color:rgba(255,232,208,0.5);margin-bottom:4px;">將代替燒炮仗</p>
+
+    <p style="font-size:0.82rem;color:rgba(255,232,208,0.5)">而<span id="chicken-name-2" style="color:var(--gold)">原先被選</span>的人，必須：</p>
+
+    <div class="forfeit-reveal">
+      <span class="forfeit-emoji" id="forfeit-emoji">🎤</span>
+      <div class="forfeit-text" id="forfeit-text">大聲唱一首歌！</div>
+    </div>
+
+    <div class="result-card" id="history-card-2" style="display:none;">
+      <div class="result-card-title">📜 本輪歷史</div>
+      <div id="history-list-2"></div>
+    </div>
+
+    <hr class="gold">
+    <button class="btn-main" onclick="showScreen('wheel-screen');drawWheel()">
+      🔄 繼續轉下一輪！
+    </button>
+    <button class="btn-secondary" onclick="resetAll()" style="margin-top:8px;">重新開始</button>
+  </div>
+
+</div>
+
+<script>
+// ── State ──
+let names = [];
+let currentWinner = '';
+let spinHistory = [];
+let isSpinning = false;
+
+// ── Forfeits ──
+const forfeits = [
+  { e: '🎤', t: '唱生日歌' },
+  { e: '👁️', t: '試下唔眨眼30秒。' },
+  { e: '🍶', t: '一口乾杯（飲料自選）' },
+  { e: '📸', t: '被全家人拍最搞笑合照' },
+  { e: '🗣️', t: '大聲讀出一段急口令' },
+  { e: '🤸', t: '做十下掌上壓或10個深蹲' },
+  { e: '🐥', t: '學雞叫三聲' },
+  { e: '🐶', t: '學狗費三聲' },
+  { e: '☁︎', t: '畀個「屋企入面」嘅天氣報告。' },
+  { e: '🎭', t: '講一個笑話' },
+  { e: '🗿', t: '扮雕像兩分鐘' },
+  { e: '😈', t: '笑到好似電影入面嘅邪惡反派噉。' },
+  { e: '🫡', t: '軍姿站立一分鐘，其他人可以唧佢' },
+  { e: '🎬', t: '重演一幕自選電影場景' },
+];
+
+// ── Wheel colors (festive) ──
+const WHEEL_COLORS = [
+  '#C0180E','#B8860B','#8B0000','#DAA520','#A0200A',
+  '#CD853F','#991509','#E8A000','#7A0A05','#C68B00',
+];
+
+// ── DOM helpers ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function updateCountHint() {
+  const h = document.getElementById('count-hint');
+  const btn = document.getElementById('spin-btn');
+  if (names.length === 0) {
+    h.textContent = '尚未加入任何人';
+    btn.disabled = true;
+  } else if (names.length === 1) {
+    h.textContent = '只有1人 — 答案已呼之欲出 😅';
+    btn.disabled = false;
+  } else {
+    h.textContent = `共 ${names.length} 位參加者`;
+    btn.disabled = false;
+  }
+}
+
+function renderNameTags() {
+  const list = document.getElementById('names-list');
+  list.innerHTML = '';
+  names.forEach((n, i) => {
+    const tag = document.createElement('div');
+    tag.className = 'name-tag';
+    tag.innerHTML = `<span>${n}</span><button class="name-tag-del" onclick="removeName(${i})">✕</button>`;
+    list.appendChild(tag);
+  });
+  updateCountHint();
+}
+
+function addName() {
+  const input = document.getElementById('name-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (names.includes(val)) { input.value=''; return; }
+  names.push(val);
+  input.value = '';
+  renderNameTags();
+  input.focus();
+}
+
+function removeName(i) {
+  names.splice(i, 1);
+  renderNameTags();
+}
+
+function addDefaults() {
+  const defaults = ['大伯','二叔','阿媽','阿爸','大哥','細妹','阿嫲'];
+  defaults.forEach(n => { if (!names.includes(n)) names.push(n); });
+  renderNameTags();
+}
+
+// ── Wheel ──
+function goToWheel() {
+  if (names.length < 1) return;
+  showScreen('wheel-screen');
+  drawWheel(0);
+}
+
+function drawWheel(rotation) {
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, r = W/2 - 10;
+  ctx.clearRect(0,0,W,H);
+
+  const n = names.length;
+  const arc = (2 * Math.PI) / n;
+  const rot = rotation || 0;
+
+  names.forEach((name, i) => {
+    const start = rot + i * arc - Math.PI/2;
+    const end = start + arc;
+
+    // Slice
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+    ctx.fill();
+
+    // Border
+    ctx.strokeStyle = 'rgba(245,200,66,0.6)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(start + arc/2);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#FFE8D0';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 6;
+
+    const fontSize = n > 8 ? 18 : n > 5 ? 22 : 26;
+    ctx.font = `bold ${fontSize}px "Noto Serif TC", serif`;
+    const textR = r * 0.82;
+    ctx.fillText(name, textR, fontSize * 0.35);
+    ctx.restore();
+  });
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = 'rgba(245,200,66,0.8)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+}
+
+let currentAngle = 0;
+
+function spinWheel() {
+  if (isSpinning) return;
+  isSpinning = true;
+  const btn = document.getElementById('spin-go-btn');
+  btn.disabled = true;
+  document.getElementById('wheel-wrap').classList.add('spinning');
+
+  const n = names.length;
+  const extraSpins = 8 + Math.random() * 6; // 8-14 full rotations
+  const winnerIdx = Math.floor(Math.random() * n);
+  const arc = (2 * Math.PI) / n;
+
+  // Target angle: pointer (top) should land on winner slice centre
+  const targetAngle = currentAngle + extraSpins * 2 * Math.PI
+    + (2 * Math.PI - (winnerIdx * arc + arc/2) - currentAngle % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+
+  const duration = 4500;
+  const start = performance.now();
+  const startAngle = currentAngle;
+
+  function easeOut(t) {
+    return 1 - Math.pow(1 - t, 4);
+  }
+
+  function frame(now) {
+    const elapsed = now - start;
+    const t = Math.min(elapsed / duration, 1);
+    const angle = startAngle + (targetAngle - startAngle) * easeOut(t);
+    currentAngle = angle;
+    drawWheel(angle);
+
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      // Done
+      isSpinning = false;
+      btn.disabled = false;
+      document.getElementById('wheel-wrap').classList.remove('spinning');
+      currentWinner = names[winnerIdx];
+      showResult(winnerIdx);
+    }
+  }
+
+  requestAnimationFrame(frame);
+}
+
+function showResult(winnerIdx) {
+  currentWinner = names[winnerIdx];
+  spinHistory.push({ winner: currentWinner, chickened: false, nominee: null });
+  updateHistoryDisplay();
+
+  document.getElementById('result-name').textContent = currentWinner;
+  document.getElementById('result-desc').textContent =
+    `恭喜你，${currentWinner}！你被命運選中點燃炮仗！\n大膽出手，祝一切順利！🙏`;
+
+  // Populate chicken screen nominee list (exclude winner)
+  const sel = document.getElementById('nominee-select');
+  sel.innerHTML = '';
+  names.filter(n => n !== currentWinner).forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+
+  // Show/hide chicken button
+  const chickenBtn = document.getElementById('chicken-btn');
+  chickenBtn.style.display = names.length > 1 ? 'block' : 'none';
+
+  showScreen('result-screen');
+  triggerSparks();
+}
+
+function updateHistoryDisplay() {
+  [document.getElementById('history-list'), document.getElementById('history-list-2')].forEach(el => {
+    if (!el) return;
+    el.innerHTML = '';
+    spinHistory.forEach((h, i) => {
+      const d = document.createElement('div');
+      d.className = 'history-line';
+      let txt = `第${i+1}輪：${h.winner}`;
+      if (h.chickened && h.nominee) txt += ` → 提名了 ${h.nominee}（受罰）`;
+      d.textContent = txt;
+      el.appendChild(d);
+    });
+  });
+  const cards = ['history-card','history-card-2'];
+  cards.forEach(id => {
+    const c = document.getElementById(id);
+    if (c) c.style.display = spinHistory.length > 1 ? 'block' : 'none';
+  });
+}
+
+function goChicken() {
+  if (names.length <= 1) return;
+  showScreen('chicken-screen');
+}
+
+function confirmChicken() {
+  const nominee = document.getElementById('nominee-select').value;
+  if (!nominee) return;
+
+  // Update history
+  if (spinHistory.length > 0) {
+    const last = spinHistory[spinHistory.length - 1];
+    last.chickened = true;
+    last.nominee = nominee;
+  }
+  updateHistoryDisplay();
+
+  // Pick random forfeit
+  const f = forfeits[Math.floor(Math.random() * forfeits.length)];
+
+  document.getElementById('nominee-name').textContent = nominee;
+  document.getElementById('chicken-name-2').textContent = currentWinner;
+  document.getElementById('forfeit-emoji').textContent = f.e;
+  document.getElementById('forfeit-text').textContent = f.t;
+
+  showScreen('forfeit-screen');
+  triggerSparks(true);
+}
+
+function resetAll() {
+  names = [];
+  currentWinner = '';
+  spinHistory = [];
+  currentAngle = 0;
+  renderNameTags();
+  showScreen('setup-screen');
+}
+
+// ── Sparks / Confetti ──
+function triggerSparks(confetti = false) {
+  const container = document.getElementById('sparks');
+  container.innerHTML = '';
+  container.classList.add('active');
+
+  const count = confetti ? 60 : 40;
+  const colors = confetti
+    ? ['#FFE066','#C0180E','#FF6B6B','#FFB347','#FFFFFF','#F5C842']
+    : ['#FFE066','#F5C842','#FF6B6B','#C0180E'];
+
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = confetti ? 'confetti-piece' : 'spark';
+    const angle = Math.random() * 2 * Math.PI;
+    const dist = 80 + Math.random() * (confetti ? 250 : 150);
+    const dur = 0.6 + Math.random() * 0.8;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    el.style.cssText = `
+      left:${cx}px; top:${cy}px;
+      background:${color};
+      --dx:${Math.cos(angle)*dist}px;
+      --dy:${Math.sin(angle)*dist}px;
+      --dur:${dur}s;
+      --rot:${Math.random()*720}deg;
+      border-radius:${confetti ? Math.random()*4 : 50}%;
+      width:${confetti ? 8+Math.random()*6 : 5+Math.random()*5}px;
+      height:${confetti ? 8+Math.random()*6 : 5+Math.random()*5}px;
+    `;
+    container.appendChild(el);
+  }
+
+  setTimeout(() => {
+    container.classList.remove('active');
+    container.innerHTML = '';
+  }, 1600);
+}
+
+// ── Init ──
+renderNameTags();
+</script>
+</body>
+</html>
